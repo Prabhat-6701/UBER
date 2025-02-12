@@ -1,18 +1,22 @@
-# /users/register Endpoint Documentation
+# API Endpoints Documentation
 
-## Description
+---
+
+## /users/register Endpoint Documentation
+
+### Description
 
 The `/users/register` endpoint registers a new user. It validates the request payload, hashes the provided password, creates a new user record, and returns an authentication token along with the user details.
 
-## HTTP Method
+### HTTP Method
 
 **POST**
 
-## URL
+### URL
 
 `/users/register`
 
-## Request Body
+### Request Body
 
 The request must be in JSON format with the following structure:
 
@@ -27,12 +31,15 @@ The request must be in JSON format with the following structure:
 }
 ```
 
-fullname.firstname: Required; must be at least 3 characters long.  
-fullname.lastname: Optional; if provided, it must be at least 3 characters long.  
-email: Required; must be a valid email and at least 3 characters long.  
-password: Required; must be at least 6 characters long.
+- **fullname.firstname:** Required; must be at least 3 characters long.
+- **fullname.lastname:** Optional; if provided, it must be at least 3 characters long.
+- **email:** Required; must be a valid email and at least 3 characters long.
+- **password:** Required; must be at least 6 characters long.
 
-## Success Response
+### Success Response
+
+- **Status Code:** `201 Created`
+- **Response Body:**
 
 ```json
 {
@@ -48,11 +55,10 @@ password: Required; must be at least 6 characters long.
 }
 ```
 
-## Error Response
+### Error Response
 
-**Status Code:** 400 Bad Request
-
-**Response Body:**
+- **Status Code:** `400 Bad Request`
+- **Response Body:**
 
 ```json
 {
@@ -66,11 +72,181 @@ password: Required; must be at least 6 characters long.
 }
 ```
 
-## Additional Notes
+### Additional Notes
 
-- The endpoint uses express-validator to validate incoming data.
-- The password is hashed using bcrypt (via userModel.hashPassword).
+- The endpoint uses `express-validator` to validate incoming data.
+- The password is hashed using bcrypt (via `userModel.hashPassword`).
 - A JSON Web Token (JWT) is generated for the newly created user.
-- The service layer (userService.createUser) is responsible for creating and saving the user record.
+- The service layer (`userService.createUser`) is responsible for creating and saving the user record.
 
-Make sure to place this file in your `/d:/UBER/Backend` folder.
+---
+
+## /users/login Endpoint Documentation
+
+### Description
+
+The `/users/login` endpoint logs in an existing user. It validates the request payload, verifies the user's credentials by comparing the provided password with the stored hashed password, and on success returns an authentication token along with the user details.
+
+### HTTP Method
+
+**POST**
+
+### URL
+
+`/users/login`
+
+### Request Body
+
+The request must be in JSON format with the following structure:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "yourPassword123"
+}
+```
+
+- **email:** Required; must be a valid email and at least 3 characters long.
+- **password:** Required; must be at least 6 characters long.
+
+### Success Response
+
+- **Status Code:** `200 OK`
+- **Response Body:**
+
+```json
+{
+  "token": "generatedAuthToken",
+  "user": {
+    "fullname": {
+      "firstname": "YourFirstName",
+      "lastname": "YourLastName"
+    },
+    "email": "user@example.com"
+    // additional user properties
+  }
+}
+```
+
+### Error Response
+
+- **Status Code:** `400 Bad Request` for validation errors.
+- **Status Code:** `401 Unauthorized` if the credentials are invalid.
+- **Response Body (Invalid Credentials):**
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+### Additional Notes
+
+- The endpoint uses `express-validator` to validate incoming data.
+- The provided password is compared with the stored hashed password using the `user.comaparePassword` method.
+- On a successful login, a JSON Web Token (JWT) is generated for the user.
+- If the user is not found or the password does not match, the endpoint returns a 401 status code with an appropriate error message.
+
+---
+
+## /users/profile Endpoint Documentation
+
+### Description
+
+The `/users/profile` endpoint retrieves the authenticated user's profile information. This endpoint requires the user to be authenticated via a valid JWT.
+
+### HTTP Method
+
+**GET**
+
+### URL
+
+`/users/profile`
+
+### Headers Required
+
+```
+Authorization: Bearer <token>
+```
+
+### Success Response
+
+- **Status Code:** `200 OK`
+- **Response Body:**
+
+```json
+{
+  "fullname": {
+    "firstname": "YourFirstName",
+    "lastname": "YourLastName"
+  },
+  "email": "user@example.com"
+  // additional user properties
+}
+```
+
+### Error Response
+
+- **Status Code:** `401 Unauthorized`
+- **Response Body:**
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+### Additional Notes
+
+- The endpoint uses an authentication middleware which verifies the JWT and appends the user to `req.user`.
+
+---
+
+## /users/logout Endpoint Documentation
+
+### Description
+
+The `/users/logout` endpoint logs out the current user. It clears the authentication cookie and adds the user's JWT to a blacklist (with a TTL of 24 hours) to prevent further use.
+
+### HTTP Method
+
+**GET**
+
+### URL
+
+`/users/logout`
+
+### Headers Required
+
+```
+Authorization: Bearer <token>
+```
+
+or use the authentication cookie.
+
+### Success Response
+
+- **Status Code:** `200 OK`
+- **Response Body:**
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+### Error Response
+
+- **Status Code:** `401 Unauthorized`
+- **Response Body:**
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+### Additional Notes
+
+- The endpoint uses the authentication middleware to verify the user.
+- The current JWT token is cleared from the cookie and added to the blacklist so it cannot be used again.
