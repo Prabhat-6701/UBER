@@ -250,3 +250,96 @@ or use the authentication cookie.
 
 - The endpoint uses the authentication middleware to verify the user.
 - The current JWT token is cleared from the cookie and added to the blacklist so it cannot be used again.
+
+---
+
+## /captain/register Endpoint Documentation
+
+### Description
+
+The `/captains/register` endpoint registers a new captain. It validates the request payload and then creates a new captain record with both personal and vehicle information.
+
+### HTTP Method
+
+**POST**
+
+### URL
+
+`/captain/register`
+
+### Request Body
+
+The request must be in JSON format with the following structure:
+
+```json
+{
+  "fullname": {
+    "firstname": "YourFirstName",
+    "lastname": "YourLastName"  // Optional: if provided, should be a valid string.
+  },
+  "email": "user@example.com",
+  "password": "yourPassword123",
+  "vehicle": {
+    "color": "Blue",
+    "plate": "XYZ123",
+    "capacity": 4,
+    "vehicleType": "car"      // Accepted values: "car", "motorcycle", "auto"
+  }
+}
+```
+
+- **fullname.firstname:** Required; must be at least 3 characters long.
+- **fullname.lastname:** Optional.
+- **email:** Required; must be a valid email address.
+- **password:** Required; must be at least 6 characters long.
+- **vehicle.color:** Required; must be at least 3 characters long.
+- **vehicle.plate:** Required; must be at least 3 characters long.
+- **vehicle.capacity:** Required; must be an integer of at least 1.
+- **vehicle.vehicleType:** Required; must be one of `"car"`, `"motorcycle"`, or `"auto"`.
+
+### Success Response
+
+- **Status Code:** `201 Created`
+- **Response Body:**
+
+```json
+{
+  "captain": {
+    "fullname": {
+      "firstname": "YourFirstName",
+      "lastname": "YourLastName"
+    },
+    "email": "user@example.com",
+    "vehicle": {
+      "color": "Blue",
+      "plate": "XYZ123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+    // additional captain properties if applicable
+  }
+}
+```
+
+### Error Response
+
+- **Status Code:** `400 Bad Request`
+- **Response Body:**
+
+```json
+{
+  "errors": [
+    {
+      "msg": "Validation error message",
+      "param": "field",
+      "location": "body"
+    }
+  ]
+}
+```
+
+### Additional Notes
+
+- The endpoint uses `express-validator` to validate incoming data.
+- All fields are required; if any field is missing or does not meet validation rules, the endpoint will return a 400 error.
+- The business logic for creating a captain is implemented in the `captainService.createCaptain` function.
