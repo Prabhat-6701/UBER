@@ -136,7 +136,7 @@ The request must be in JSON format with the following structure:
 
 ```json
 {
-  "message": "Invalid email or password"
+  "message": "Invalid email or password" // Error message for invalid credentials.
 }
 ```
 
@@ -274,16 +274,16 @@ The request must be in JSON format with the following structure:
 ```json
 {
   "fullname": {
-    "firstname": "YourFirstName",
-    "lastname": "YourLastName"  // Optional: if provided, should be a valid string.
+    "firstname": "YourFirstName", // Required; must be at least 3 characters long.
+    "lastname": "YourLastName"      // Optional.
   },
-  "email": "user@example.com",
-  "password": "yourPassword123",
+  "email": "user@example.com",         // Required; valid email.
+  "password": "yourPassword123"          // Required; at least 6 characters long.
   "vehicle": {
-    "color": "Blue",
-    "plate": "XYZ123",
-    "capacity": 4,
-    "vehicleType": "car"      // Accepted values: "car", "motorcycle", "auto"
+    "color": "Blue",                  // Required; at least 3 characters long.
+    "plate": "XYZ123",                // Required; at least 3 characters long.
+    "capacity": 4,                    // Required; integer value, minimum 1.
+    "vehicleType": "car"              // Required; accepted values: "car", "motorcycle", "auto".
   }
 }
 ```
@@ -343,3 +343,48 @@ The request must be in JSON format with the following structure:
 - The endpoint uses `express-validator` to validate incoming data.
 - All fields are required; if any field is missing or does not meet validation rules, the endpoint will return a 400 error.
 - The business logic for creating a captain is implemented in the `captainService.createCaptain` function.
+
+/captains/login Endpoint Documentation
+Description:
+Logs in an existing captain by verifying provided credentials.
+
+HTTP Method:
+POST
+
+URL:
+/captains/login
+Request Body Example:
+
+{
+    "email": "user@example.com",         // Required; valid email.
+    "password": "yourPassword123"          // Required; at least 6 characters long.
+}
+
+Success Response:
+
+Status Code: 200 OK
+Response Body Example:
+{
+    "token": "generatedAuthToken",       // JWT for authentication.
+    "captain": {
+        "fullname": {
+            "firstname": "YourFirstName",
+            "lastname": "YourLastName"
+        },
+        "email": "user@example.com"
+        // additional captain properties if applicable
+    }
+}
+
+### Error Response
+
+- **Status Code:** `400 Bad Request` for validation errors.
+- **Status Code:** `401 Unauthorized` if the credentials are invalid.
+- **Response Body (Invalid Credentials):**
+
+```json
+{
+    "message": "Invalid email or password" // Error message for invalid credentials.
+}
+```
+
